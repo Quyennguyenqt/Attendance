@@ -11,10 +11,20 @@ from PIL import Image
 import pandas as pd
 import datetime
 import time
-
+import databaseScript
 #Functions===========================================================
 
 #AskforQUIT
+#================================================
+ts = time.time()
+date1 = datetime.datetime.fromtimestamp(ts).strftime('_%d_%m_%Y')
+timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+databaseScript.create_data_register()
+databaseScript.create_data_attendance(date1)
+databaseScript.check_absence()
+#================================================
+
+
 def on_closing():
     if mess.askyesno("Quit", "You are exiting window.Do you want to quit?"):
         window.destroy()
@@ -138,6 +148,7 @@ def psw():
 
 #$$$$$$$$$$$$$
 def TakeImages():
+    date = datetime.datetime.fromtimestamp(ts).strftime('%d_%m_%Y')
     check_haarcascadefile()
     columns = ['SERIAL NO.', '', 'ID', '', 'NAME']
     assure_path_exists("StudentDetails/")
@@ -159,6 +170,7 @@ def TakeImages():
         csvFile1.close()
     Id = (txt.get())
     name = (txt2.get())
+    # databaseScript.insert_data_register(Id, name, date, timeStamp)
     if ((name.isalpha()) or (' ' in name)):
         cam = cv2.VideoCapture(0)
         harcascadePath = "haarcascade_frontalface_default.xml"
@@ -287,13 +299,14 @@ def TrackImages():
                 bb = str(aa)
                 bb = bb[2:-2]
                 attendance = [str(ID), '', bb, '', str(date), '', str(timeStamp)]
-
+                # databaseScript.insert_data_attendance(ID,bb,date,timeStamp)
             else:
                 Id = 'Unknown'
                 bb = str(Id)
             cv2.putText(im, str(bb), (x, y + h), font, 1, (0, 251, 255), 2)
         cv2.imshow('Taking Attendance', im)
         if (cv2.waitKey(1) == ord('q')):
+            databaseScript.check_absence()
             break
     ts = time.time()
     date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
@@ -320,7 +333,6 @@ def TrackImages():
     csvFile1.close()
     cam.release()
     cv2.destroyAllWindows()
-
 #Front End===========================================================
 
 window = tkinter.Tk()
