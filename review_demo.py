@@ -12,6 +12,7 @@ import pandas as pd
 import datetime
 import time
 import databaseScript
+
 #Functions===========================================================
 
 #AskforQUIT
@@ -21,7 +22,6 @@ date1 = datetime.datetime.fromtimestamp(ts).strftime('_%d_%m_%Y')
 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 databaseScript.create_data_register()
 databaseScript.create_data_attendance(date1)
-databaseScript.check_absence()
 #================================================
 
 
@@ -170,7 +170,8 @@ def TakeImages():
         csvFile1.close()
     Id = (txt.get())
     name = (txt2.get())
-    # databaseScript.insert_data_register(Id, name, date, timeStamp)
+    tstm = time.time()
+    timeStamptm = datetime.datetime.fromtimestamp(tstm).strftime('%H:%M:%S')
     if ((name.isalpha()) or (' ' in name)):
         cam = cv2.VideoCapture(0)
         harcascadePath = "haarcascade_frontalface_default.xml"
@@ -193,7 +194,7 @@ def TakeImages():
             if cv2.waitKey(100) & 0xFF == ord('q'):
                 break
             # break if the sample number is morethan 100
-            elif sampleNum > 100:
+            elif sampleNum > 25:
                 break
         cam.release()
         cv2.destroyAllWindows()
@@ -204,6 +205,7 @@ def TakeImages():
             writer.writerow(row)
         csvFile.close()
         message1.configure(text=res)
+        databaseScript.insert_data_register(Id, name, date, timeStamptm)
     else:
         if (name.isalpha() == False):
             res = "Enter Correct name"
@@ -211,6 +213,7 @@ def TakeImages():
 ########################################################################################
 #$$$$$$$$$$$$$
 def TrainImages():
+    clear()
     check_haarcascadefile()
     assure_path_exists("Pass_Train/")
     recognizer = cv2.face_LBPHFaceRecognizer.create()
@@ -260,7 +263,7 @@ def TrackImages():
     msg = ''
     i = 0
     j = 0
-    recognizer =cv2.face.LBPHFaceRecognizer_create() 
+    recognizer =cv2.face.LBPHFaceRecognizer_create()
     exists3 = os.path.isfile("Pass_Train\Trainner.yml")
     if exists3:
         recognizer.read("Pass_Train\Trainner.yml")
@@ -268,7 +271,7 @@ def TrackImages():
         mess._show(title='Data Missing', message='Please click on Save Profile to reset data!!')
         return
     harcascadePath = "haarcascade_frontalface_default.xml"
-    faceCascade = cv2.CascadeClassifier(harcascadePath);
+    faceCascade = cv2.CascadeClassifier(harcascadePath)
 
     cam = cv2.VideoCapture(0)
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -424,7 +427,7 @@ takeImg.place(x=30, y=350,relwidth=0.89)
 trainImg = tkinter.Button(frame1, text="Save Profile", command=psw, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 16, ' bold '))
 trainImg.place(x=30, y=430,relwidth=0.89)
 
-trackImg = tkinter.Button(frame2, text="Take Attendance", command=TrackImages, fg="black", bg="#00aeff", height=1, activebackground = "white" ,font=('times', 16, ' bold '))
+trackImg = tkinter.Button(frame2, text="Take Attendance", command=TrackImages, fg="black", bg="#00aeff", height=1, activebackground ="white", font=('times', 16, ' bold '))
 trackImg.place(x=30,y=60,relwidth=0.89)
 
 quitWindow = tkinter.Button(frame2, text="Quit", command=window.destroy, fg="white", bg="#13059c", width=35, height=1, activebackground = "white", font=('times', 16, ' bold '))
