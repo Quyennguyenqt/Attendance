@@ -11,6 +11,7 @@ from PIL import Image
 import pandas as pd
 import datetime
 import time
+from tkcalendar import Calendar
 import databaseScript
 
 #Functions===========================================================
@@ -21,10 +22,12 @@ ts = time.time()
 date1 = datetime.datetime.fromtimestamp(ts).strftime('_%d_%m_%Y')
 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
 databaseScript.create_data_register()
-databaseScript.create_data_attendance(date1)
+databaseScript.create_infor_st()
+# databaseScript.create_data_attendance(date1)
 #================================================
 
-
+def on_success():
+    mess.showinfo('Information','You register successful!')
 def on_closing():
     if mess.askyesno("Quit", "You are exiting window.Do you want to quit?"):
         window.destroy()
@@ -40,8 +43,11 @@ def about():
 def clear():
     txt.delete(0, 'end')
     txt2.delete(0, 'end')
+    # txt3.delete(0, 'end')
+    # txt4.delete(0, 'end')
+    # txt5.delete(0, 'end')
     res = "1)Take Images  ===> 2)Save Profile"
-    message1.configure(text=res)
+    # message1.configure(text=res)
 
 #Check for correct Path
 def assure_path_exists(path):
@@ -51,7 +57,7 @@ def assure_path_exists(path):
 
 #check for haarcascade file
 def check_haarcascadefile():
-    exists = os.path.isfile("haarcascade_frontalface_default.xml")
+    exists = os.path.isfile("H:\Pycharm\FaceRecoginitonGUIv2\haarcascade_frontalface_default.xml")
     if exists:
         pass
     else:
@@ -61,9 +67,9 @@ def check_haarcascadefile():
 #check the password for change the password
 def save_pass():
     assure_path_exists("Pass_Train/")
-    exists1 = os.path.isfile("Pass_Train\pass.txt")
+    exists1 = os.path.isfile("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt")
     if exists1:
-        tf = open("Pass_Train\pass.txt", "r")
+        tf = open("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt", "r")
         str = tf.read()
     else:
         master.destroy()
@@ -71,7 +77,7 @@ def save_pass():
         if new_pas == None:
             mess._show(title='Null Password Entered', message='Password not set.Please try again!')
         else:
-            tf = open("Pass_Train\pass.txt", "w")
+            tf = open("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt", "w")
             tf.write(new_pas)
             mess._show(title='Password Registered!', message='New password was registered successfully!')
             return
@@ -80,7 +86,7 @@ def save_pass():
     nnewp = (nnew.get())
     if (op == str):
         if(newp == nnewp):
-            txf = open("Pass_Train\pass.txt", "w")
+            txf = open("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt", "w")
             txf.write(newp)
         else:
             mess._show(title='Error', message='Confirm new password again!!!')
@@ -122,24 +128,23 @@ def change_pass():
 
 #ask for password
 def psw():
-    assure_path_exists("Pass_Train/")
-    exists1 = os.path.isfile("Pass_Train\pass.txt")
+    assure_path_exists("H:/Pycharm/FaceRecoginitonGUIv2/Pass_Train/")
+    exists1 = os.path.isfile("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt")
     if exists1:
-        tf = open("Pass_Train\pass.txt", "r")
+        tf = open("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt", "r")
         str_pass = tf.read()
     else:
         new_pas = tsd.askstring('Old Password not found', 'Please enter a new password below', show='*')
         if new_pas == None:
             mess._show(title='No Password Entered', message='Password not set!! Please try again')
         else:
-            tf = open("Pass_Train\pass.txt", "w")
+            tf = open("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\pass.txt", "w")
             tf.write(new_pas)
             mess._show(title='Password Registered', message='New password was registered successfully!!')
             return
     password = tsd.askstring('Password', 'Enter Password', show='*')
     if (password == str_pass):
         TrainImages()
-
     elif (password == None):
         pass
     else:
@@ -151,38 +156,44 @@ def TakeImages():
     date = datetime.datetime.fromtimestamp(ts).strftime('%d_%m_%Y')
     check_haarcascadefile()
     columns = ['SERIAL NO.', '', 'ID', '', 'NAME']
-    assure_path_exists("StudentDetails/")
+    assure_path_exists("H:/Pycharm/FaceRecoginitonGUIv2/StudentDetails/")
     assure_path_exists("TrainingImage/")
     serial = 0
-    exists = os.path.isfile("StudentDetails\StudentDetails.csv")
+    exists = os.path.isfile("H:\Pycharm\FaceRecoginitonGUIv2\StudentDetails\StudentDetails.csv")
     if exists:
-        with open("StudentDetails\StudentDetails.csv", 'r') as csvFile1:
+        with open("H:\Pycharm\FaceRecoginitonGUIv2\StudentDetails\StudentDetails.csv", 'r') as csvFile1:
             reader1 = csv.reader(csvFile1)
             for l in reader1:
                 serial = serial + 1
         serial = (serial // 2)
         csvFile1.close()
     else:
-        with open("StudentDetails\StudentDetails.csv", 'a+') as csvFile1:
+        with open("H:\Pycharm\FaceRecoginitonGUIv2\StudentDetails\StudentDetails.csv", 'a+') as csvFile1:
             writer = csv.writer(csvFile1)
             writer.writerow(columns)
             serial = 1
         csvFile1.close()
     Id = (txt.get())
     name = (txt2.get())
+    dob = (cal3.get_date())
+    faculty = (facultychoosen.get())
+    gender = (var.get())
+    nameClass = (classchoosen.get())
     tstm = time.time()
     timeStamptm = datetime.datetime.fromtimestamp(tstm).strftime('%H:%M:%S')
-    if ((name.isalpha()) or (' ' in name)):
+    if ((name.isalpha()) or (' ' in name) ):
         cam = cv2.VideoCapture(0)
-        harcascadePath = "haarcascade_frontalface_default.xml"
+        harcascadePath = "H:\Pycharm\FaceRecoginitonGUIv2\haarcascade_frontalface_default.xml"
         detector = cv2.CascadeClassifier(harcascadePath)
         sampleNum = 0
         while (True):
             ret, img = cam.read()
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            faces = detector.detectMultiScale(gray, 1.05, 5)
+            # faces = detector.detectMultiScale(gray, 1.05, 5)
+            faces = detector.detectMultiScale(gray, 1.2, 5)
             for (x, y, w, h) in faces:
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                # cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                 # incrementing sample number
                 sampleNum = sampleNum + 1
                 # saving the captured face in the dataset folder TrainingImage
@@ -194,18 +205,22 @@ def TakeImages():
             if cv2.waitKey(100) & 0xFF == ord('q'):
                 break
             # break if the sample number is morethan 100
-            elif sampleNum > 25:
+            elif sampleNum > 30:
                 break
         cam.release()
         cv2.destroyAllWindows()
         res = "Images Taken for ID : " + Id
         row = [serial, '', Id, '', name]
-        with open('StudentDetails\StudentDetails.csv', 'a+') as csvFile:
+        with open('H:\Pycharm\FaceRecoginitonGUIv2\StudentDetails\StudentDetails.csv', 'a+') as csvFile:
             writer = csv.writer(csvFile)
             writer.writerow(row)
         csvFile.close()
-        message1.configure(text=res)
-        databaseScript.insert_data_register(Id, name, date, timeStamptm)
+        # message1.configure(text=res)
+        # databaseScript.insert_data_register(Id, name, date, timeStamptm, nameClass)
+        databaseScript.insert_infor_st(Id,name,dob,faculty,gender,nameClass)
+        res = "Images Saved for Enrollment : " + Id + " Name : " + name
+        Notification.configure(text=res, bg="SpringGreen3", width=60, font=('times', 16, 'bold'))
+        Notification.place(x=250, y=300)
     else:
         if (name.isalpha() == False):
             res = "Enter Correct name"
@@ -215,9 +230,9 @@ def TakeImages():
 def TrainImages():
     clear()
     check_haarcascadefile()
-    assure_path_exists("Pass_Train/")
+    assure_path_exists("H:/Pycharm/FaceRecoginitonGUIv2/Pass_Train/")
     recognizer = cv2.face_LBPHFaceRecognizer.create()
-    harcascadePath = "haarcascade_frontalface_default.xml"
+    harcascadePath = "H:\Pycharm\FaceRecoginitonGUIv2\haarcascade_frontalface_default.xml"
     detector = cv2.CascadeClassifier(harcascadePath)
     faces, ID = getImagesAndLabels("TrainingImage")
     try:
@@ -225,11 +240,11 @@ def TrainImages():
     except:
         mess._show(title='No Registrations', message='Please Register someone first!!!')
         return
-    recognizer.save("Pass_Train\Trainner.yml")
+    recognizer.save("H:\Pycharm\FaceRecoginitonGUIv2\Pass_Train\Trainner.yml")
     res = "Profile Saved Successfully"
-    message1.configure(text=res)
-    message.configure(text='Total Registrations till now  : ' + str(ID[0]))
-
+    # message1.configure(text=res)
+    # message.configure(text='Total Registrations till now  : ' + str(ID[0]))
+    on_success()
 ############################################################################################3
 #$$$$$$$$$$$$$
 def getImagesAndLabels(path):
@@ -254,88 +269,88 @@ def getImagesAndLabels(path):
 
 ###########################################################################################
 #$$$$$$$$$$$$$
-def TrackImages():
-    check_haarcascadefile()
-    assure_path_exists("Attendance/")
-    assure_path_exists("StudentDetails/")
-    for k in tb.get_children():
-        tb.delete(k)
-    msg = ''
-    i = 0
-    j = 0
-    recognizer =cv2.face.LBPHFaceRecognizer_create()
-    exists3 = os.path.isfile("Pass_Train\Trainner.yml")
-    if exists3:
-        recognizer.read("Pass_Train\Trainner.yml")
-    else:
-        mess._show(title='Data Missing', message='Please click on Save Profile to reset data!!')
-        return
-    harcascadePath = "haarcascade_frontalface_default.xml"
-    faceCascade = cv2.CascadeClassifier(harcascadePath)
-
-    cam = cv2.VideoCapture(0)
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    col_names = ['Id', '', 'Name', '', 'Date', '', 'Time']
-    exists1 = os.path.isfile("StudentDetails\StudentDetails.csv")
-    if exists1:
-        df = pd.read_csv("StudentDetails\StudentDetails.csv")
-    else:
-        mess._show(title='Details Missing', message='Students details are missing, please check!')
-        cam.release()
-        cv2.destroyAllWindows()
-        window.destroy()
-    while True:
-        ret, im = cam.read()
-        gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-        faces = faceCascade.detectMultiScale(gray, 1.2, 5)
-        for (x, y, w, h) in faces:
-            cv2.rectangle(im, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            serial, conf = recognizer.predict(gray[y:y + h, x:x + w])
-            if (conf < 50):
-                ts = time.time()
-                date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
-                timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
-                aa = df.loc[df['SERIAL NO.'] == serial]['NAME'].values
-                ID = df.loc[df['SERIAL NO.'] == serial]['ID'].values
-                ID = str(ID)
-                ID = ID[1:-1]
-                bb = str(aa)
-                bb = bb[2:-2]
-                attendance = [str(ID), '', bb, '', str(date), '', str(timeStamp)]
-                # databaseScript.insert_data_attendance(ID,bb,date,timeStamp)
-            else:
-                Id = 'Unknown'
-                bb = str(Id)
-            cv2.putText(im, str(bb), (x, y + h), font, 1, (0, 251, 255), 2)
-        cv2.imshow('Taking Attendance', im)
-        if (cv2.waitKey(1) == ord('q')):
-            databaseScript.check_absence()
-            break
-    ts = time.time()
-    date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
-    exists = os.path.isfile("Attendance\Attendance_" + date + ".csv")
-    if exists:
-        with open("Attendance\Attendance_" + date + ".csv", 'a+') as csvFile1:
-            writer = csv.writer(csvFile1)
-            writer.writerow(attendance)
-        csvFile1.close()
-    else:
-        with open("Attendance\Attendance_" + date + ".csv", 'a+') as csvFile1:
-            writer = csv.writer(csvFile1)
-            writer.writerow(col_names)
-            writer.writerow(attendance)
-        csvFile1.close()
-    with open("Attendance\Attendance_" + date + ".csv", 'r') as csvFile1:
-        reader1 = csv.reader(csvFile1)
-        for lines in reader1:
-            i = i + 1
-            if (i > 1):
-                if (i % 2 != 0):
-                    iidd = str(lines[0]) + '   '
-                    tb.insert('', 0, text=iidd, values=(str(lines[2]), str(lines[4]), str(lines[6])))
-    csvFile1.close()
-    cam.release()
-    cv2.destroyAllWindows()
+# def TrackImages():
+#     check_haarcascadefile()
+#     assure_path_exists("Attendance/")
+#     assure_path_exists("StudentDetails/")
+#     for k in tb.get_children():
+#         tb.delete(k)
+#     msg = ''
+#     i = 0
+#     j = 0
+#     recognizer =cv2.face.LBPHFaceRecognizer_create()
+#     exists3 = os.path.isfile("Pass_Train\Trainner.yml")
+#     if exists3:
+#         recognizer.read("Pass_Train\Trainner.yml")
+#     else:
+#         mess._show(title='Data Missing', message='Please click on Save Profile to reset data!!')
+#         return
+#     harcascadePath = "haarcascade_frontalface_default.xml"
+#     faceCascade = cv2.CascadeClassifier(harcascadePath)
+#
+#     cam = cv2.VideoCapture(0)
+#     font = cv2.FONT_HERSHEY_SIMPLEX
+#     col_names = ['Id', '', 'Name', '', 'Date', '', 'Time']
+#     exists1 = os.path.isfile("StudentDetails\StudentDetails.csv")
+#     if exists1:
+#         df = pd.read_csv("StudentDetails\StudentDetails.csv")
+#     else:
+#         mess._show(title='Details Missing', message='Students details are missing, please check!')
+#         cam.release()
+#         cv2.destroyAllWindows()
+#         window.destroy()
+#     while True:
+#         ret, im = cam.read()
+#         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+#         faces = faceCascade.detectMultiScale(gray, 1.2, 5)
+#         for (x, y, w, h) in faces:
+#             cv2.rectangle(im, (x, y), (x + w, y + h), (255, 0, 0), 2)
+#             serial, conf = recognizer.predict(gray[y:y + h, x:x + w])
+#             if (conf < 50):
+#                 ts = time.time()
+#                 date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
+#                 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+#                 aa = df.loc[df['SERIAL NO.'] == serial]['NAME'].values
+#                 ID = df.loc[df['SERIAL NO.'] == serial]['ID'].values
+#                 ID = str(ID)
+#                 ID = ID[1:-1]
+#                 bb = str(aa)
+#                 bb = bb[2:-2]
+#                 attendance = [str(ID), '', bb, '', str(date), '', str(timeStamp)]
+#                 # databaseScript.insert_data_attendance(ID,bb,date,timeStamp)
+#             else:
+#                 Id = 'Unknown'
+#                 bb = str(Id)
+#             cv2.putText(im, str(bb), (x, y + h), font, 1, (0, 251, 255), 2)
+#         cv2.imshow('Taking Attendance', im)
+#         if (cv2.waitKey(1) == ord('q')):
+#             databaseScript.check_absence()
+#             break
+#     ts = time.time()
+#     date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
+#     exists = os.path.isfile("Attendance\Attendance_" + date + ".csv")
+#     if exists:
+#         with open("Attendance\Attendance_" + date + ".csv", 'a+') as csvFile1:
+#             writer = csv.writer(csvFile1)
+#             writer.writerow(attendance)
+#         csvFile1.close()
+#     else:
+#         with open("Attendance\Attendance_" + date + ".csv", 'a+') as csvFile1:
+#             writer = csv.writer(csvFile1)
+#             writer.writerow(col_names)
+#             writer.writerow(attendance)
+#         csvFile1.close()
+#     with open("Attendance\Attendance_" + date + ".csv", 'r') as csvFile1:
+#         reader1 = csv.reader(csvFile1)
+#         for lines in reader1:
+#             i = i + 1
+#             if (i > 1):
+#                 if (i % 2 != 0):
+#                     iidd = str(lines[0]) + '   '
+#                     tb.insert('', 0, text=iidd, values=(str(lines[2]), str(lines[4]), str(lines[6])))
+#     csvFile1.close()
+#     cam.release()
+#     cv2.destroyAllWindows()
 #Front End===========================================================
 
 window = tkinter.Tk()
@@ -365,42 +380,94 @@ message3.place(x=10, y=10,relwidth=1)
 
 #frames-------------------------------------------------
 frame1 = tkinter.Frame(window, bg="white")
-frame1.place(relx=0.11, rely=0.15, relwidth=0.39, relheight=0.80)
-
-frame2 = tkinter.Frame(window, bg="white")
-frame2.place(relx=0.51, rely=0.15, relwidth=0.39, relheight=0.80)
+frame1.place(relx=0.05, rely=0.08, relwidth=0.9, relheight=0.80)
+Notification = tkinter.Label(frame1, text="All things good", bg="Green", fg="white", width=15,
+                      height=3, font=('times', 17, 'bold'))
+# frame2 = tkinter.Frame(window, bg="white")
+# frame2.place(relx=0.51, rely=0.15, relwidth=0.39, relheight=0.80)
 
 #frame_headder
 fr_head1 = tkinter.Label(frame1, text="Register New Student", fg="white",bg="black" ,font=('times', 17, ' bold ') )
 fr_head1.place(x=0,y=0,relwidth=1)
 
-fr_head2 = tkinter.Label(frame2, text="Mark Student's attendance", fg="white",bg="black" ,font=('times', 17, ' bold ') )
-fr_head2.place(x=0,y=0,relwidth=1)
+# fr_head2 = tkinter.Label(frame2, text="Mark Student's attendance", fg="white",bg="black" ,font=('times', 17, ' bold ') )
+# fr_head2.place(x=0,y=0,relwidth=1)
 
 #registretion frame
-lbl = tkinter.Label(frame1, text="Enter ID",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 17, ' bold ') )
-lbl.place(x=0, y=55)
+lbl = tkinter.Label(frame1, text="Enter ID   ",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 14, ' bold ') )
+lbl.place(x=0, y=35)
 
-txt = tkinter.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 15, ' bold '))
-txt.place(x=55, y=88,relwidth=0.75)
+txt = tkinter.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 14, ' bold '))
+txt.place(x=55, y=75,relwidth=0.2)
 
-lbl2 = tkinter.Label(frame1, text="Enter Name",width=20  ,fg="black"  ,bg="white" ,font=('times', 17, ' bold '))
-lbl2.place(x=0, y=140)
+lbl2 = tkinter.Label(frame1, text="Enter Name",width=20  ,fg="black"  ,bg="white" ,font=('times', 14, ' bold '))
+lbl2.place(x=0, y=125)
 
-txt2 = tkinter.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 15, ' bold ')  )
-txt2.place(x=55, y=173,relwidth=0.75)
+txt2 = tkinter.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 14, ' bold ')  )
+txt2.place(x=55, y=160,relwidth=0.2)
 
-message0=tkinter.Label(frame1,text="Follow the steps...",bg="white" ,fg="black"  ,width=39 ,height=1,font=('times', 16, ' bold '))
-message0.place(x=7,y=275)
+lbl3 = tkinter.Label(frame1, text="    Date of birthday",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 14, ' bold ') )
+lbl3.place(x=350, y=35)
 
-message1 = tkinter.Label(frame1, text="1)Take Images  ===> 2)Save Profile" ,bg="white" ,fg="black"  ,width=39 ,height=1, activebackground = "yellow" ,font=('times', 15, ' bold '))
-message1.place(x=7, y=300)
+cal3 = Calendar(frame1, selectmode='day',year=2020, month=5,day=22)
+# cal3.pack(padx = 250, pady=75)
+cal3.place(x=400, y=75)
 
-message = tkinter.Label(frame1, text="" ,bg="white" ,fg="black"  ,width=39,height=1, activebackground = "yellow" ,font=('times', 16, ' bold '))
-message.place(x=7, y=500)
+lbl4 = tkinter.Label(frame1, text="Faculty      ",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 14, ' bold ') )
+lbl4.place(x=700, y=35)
+
+# txt4 = tkinter.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 14, ' bold '))
+# txt4.place(x=55, y=240,relwidth=0.2)
+f1 = tkinter.StringVar();
+facultychoosen = ttk.Combobox(frame1,width = 27, textvariable = f1,)
+facultychoosen['values'] = ('Information Technology',
+                          'Mechanical - Electrical',
+                          'Economics - Business Administration',
+                          'Mine',
+                          'Environment',
+                          'Geodesy - Maps and Land Management',
+                          'Defense Education',
+                          'Political theory')
+
+facultychoosen.place(x=700, y=75)
+facultychoosen.current()
+# Gender
+lbl5 = tkinter.Label(frame1, text="Gender      ",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 14, ' bold ') )
+lbl5.place(x=0, y=210)
+
+var = tkinter.StringVar()
+R1 = Radiobutton(frame1, text="Male", variable=var, value="Male",)
+R1.place(x=60,y=250)
+R1.select()
+
+R2 = Radiobutton(frame1, text="Female", variable=var, value="Female", )
+R2.place(x=150,y=250)
+R2.deselect()
+
+# ======================================================================================================
+lbl6 = tkinter.Label(frame1, text="Class        ",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 14, ' bold ') )
+lbl6.place(x=870, y=35)
+
+
+f2 = tkinter.StringVar();
+classchoosen = ttk.Combobox(frame1,width = 27, textvariable = f2,)
+classchoosen['values'] = ('DCCTKH61A',
+                          'DCCTKH61B',)
+
+classchoosen.place(x=890, y=75)
+classchoosen.current()
+
+# message0=tkinter.Label(frame1,text="Follow the steps...",bg="white" ,fg="black"  ,width=39 ,height=1,font=('times', 16, ' bold '))
+# message0.place(x=7,y=275)
+
+# message1 = tkinter.Label(frame1, text="1)Take Images  ===> 2)Save Profile" ,bg="white" ,fg="black"  ,width=39 ,height=1, activebackground = "yellow" ,font=('times', 15, ' bold '))
+# message1.place(x=7, y=300)
+
+message = tkinter.Label(frame1, text="" ,bg="white" ,fg="black"  ,width=39,height=1, activebackground = "yellow" ,font=('times', 12, ' bold '))
+message.place(x=350, y=550)
 #Attendance frame
-lbl3 = tkinter.Label(frame2, text="Attendance Table",width=20  ,fg="black"  ,bg="white"  ,height=1 ,font=('times', 17, ' bold '))
-lbl3.place(x=100, y=115)
+# lbl3 = tkinter.Label(frame2, text="Attendance Table",width=20  ,fg="black"  ,bg="white"  ,height=1 ,font=('times', 17, ' bold '))
+# lbl3.place(x=100, y=115)
 
 #Display total registration----------
 res=0
@@ -414,48 +481,52 @@ if exists:
     csvFile1.close()
 else:
     res = 0
-message.configure(text='Total Registrations : '+str(res))
+# message.configure(text='Total Registrations : '+str(res))
 
 #BUTTONS----------------------------------------------
 
-clearButton = tkinter.Button(frame1, text="Clear", command=clear, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
-clearButton.place(x=55, y=230,relwidth=0.29)
+# clearButton = tkinter.Button(frame1, text="Clear", command=clear, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
+# clearButton.place(x=170, y=420,relwidth=0.29)
 
-takeImg = tkinter.Button(frame1, text="Take Images", command=TakeImages, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 16, ' bold '))
-takeImg.place(x=30, y=350,relwidth=0.89)
+# takeImg = tkinter.Button(frame1, text="Take Images", command=TakeImages, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 12, ' bold '))
+# takeImg.place(x=250, y=350,relwidth=0.2)
+takeImg = tkinter.Button(frame1, text="Take Images",command=TakeImages,fg="black"  ,bg="lawn green"  ,width=12  ,height=1 ,activebackground = "Red" ,font=('times', 14, ' bold '))
+takeImg.place(x=300, y=400, relwidth=0.2)
 
-trainImg = tkinter.Button(frame1, text="Save Profile", command=psw, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 16, ' bold '))
-trainImg.place(x=30, y=430,relwidth=0.89)
+# trainImg = tkinter.Button(frame1, text="Save Profile", command=psw, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 12, ' bold '))
+# trainImg.place(x=550, y=350,relwidth=0.2)
+trainImg = tkinter.Button(frame1, text="Save Profile",command=psw,fg="black"  ,bg="lawn green"  ,width=12  ,height=1 ,activebackground = "Red" ,font=('times', 14, ' bold '))
+trainImg.place(x=600, y=400, relwidth=0.2)
 
-trackImg = tkinter.Button(frame2, text="Take Attendance", command=TrackImages, fg="black", bg="#00aeff", height=1, activebackground ="white", font=('times', 16, ' bold '))
-trackImg.place(x=30,y=60,relwidth=0.89)
-
-quitWindow = tkinter.Button(frame2, text="Quit", command=window.destroy, fg="white", bg="#13059c", width=35, height=1, activebackground = "white", font=('times', 16, ' bold '))
-quitWindow.place(x=30, y=450,relwidth=0.89)
+# trackImg = tkinter.Button(frame2, text="Take Attendance", command=TrackImages, fg="black", bg="#00aeff", height=1, activebackground ="white", font=('times', 16, ' bold '))
+# trackImg.place(x=30,y=60,relwidth=0.89)
+#
+# quitWindow = tkinter.Button(frame2, text="Quit", command=window.destroy, fg="white", bg="#13059c", width=35, height=1, activebackground = "white", font=('times', 16, ' bold '))
+# quitWindow.place(x=30, y=450,relwidth=0.89)
 
 
 
 #Attandance table----------------------------
-style = ttk.Style()
-style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
-style.configure("mystyle.Treeview.Heading",font=('times', 13,'bold')) # Modify the font of the headings
-style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
-tb= ttk.Treeview(frame2,height =13,columns = ('name','date','time'),style="mystyle.Treeview")
-tb.column('#0',width=82)
-tb.column('name',width=130)
-tb.column('date',width=133)
-tb.column('time',width=133)
-tb.grid(row=2,column=0,padx=(0,0),pady=(150,0),columnspan=4)
-tb.heading('#0',text ='ID')
-tb.heading('name',text ='NAME')
-tb.heading('date',text ='DATE')
-tb.heading('time',text ='TIME')
+# style = ttk.Style()
+# style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
+# style.configure("mystyle.Treeview.Heading",font=('times', 13,'bold')) # Modify the font of the headings
+# style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
+# tb= ttk.Treeview(frame2,height =13,columns = ('name','date','time'),style="mystyle.Treeview")
+# tb.column('#0',width=82)
+# tb.column('name',width=130)
+# tb.column('date',width=133)
+# tb.column('time',width=133)
+# tb.grid(row=2,column=0,padx=(0,0),pady=(150,0),columnspan=4)
+# tb.heading('#0',text ='ID')
+# tb.heading('name',text ='NAME')
+# tb.heading('date',text ='DATE')
+# tb.heading('time',text ='TIME')
 
 #SCROLLBAR--------------------------------------------------
 
-scroll=ttk.Scrollbar(frame2,orient='vertical',command=tb.yview)
-scroll.grid(row=2,column=4,padx=(0,100),pady=(150,0),sticky='ns')
-tb.configure(yscrollcommand=scroll.set)
+# scroll=ttk.Scrollbar(frame2,orient='vertical',command=tb.yview)
+# scroll.grid(row=2,column=4,padx=(0,100),pady=(150,0),sticky='ns')
+# tb.configure(yscrollcommand=scroll.set)
 
 #closing lines------------------------------------------------
 window.protocol("WM_DELETE_WINDOW", on_closing)

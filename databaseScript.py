@@ -8,11 +8,11 @@ c = conn.cursor()
 #============================Register============================
 def create_data_register():
         c.execute(
-            "create table if not exists Student(id integer primary key auto_increment,enrollment varchar(25) not null,fullname text not null,date varchar(20) not null, datetime varchar(50) not null);")
+            "create table if not exists Student(id integer primary key auto_increment,enrollment varchar(25) not null,fullname text not null,date varchar(20) not null, datetime varchar(50) not null,nameClass varchar(25) default null);")
 
-def insert_data_register(id, fullname, date, datetime):
-    sql = "insert into Student (enrollment,fullname, date, datetime) values(%s,%s,%s,%s);"
-    val = (id, fullname, date, datetime)
+def insert_data_register(id, fullname, date, datetime, nameClass):
+    sql = "insert into Student (enrollment,fullname, date, datetime,nameClass) values(%s,%s,%s,%s,%s);"
+    val = (id, fullname, date, datetime,nameClass)
     c.execute(sql, val)
     conn.commit()
 
@@ -21,7 +21,15 @@ def get_list_register():
     c.execute(sql)
     row = c.fetchall()
     print(row)
+def create_infor_st():
+    c.execute(
+        "create table if not exists StudentInfo(id integer primary key auto_increment,enrollment varchar(25) not null,fullname varchar(30) not null,dob varchar(20) not null, faculty varchar(50) not null, gender varchar(10) not null, nameClass varchar(20) not null);")
 
+def insert_infor_st(id, fullname, dob, faculty, gender, nameClass):
+    sql = "insert into StudentInfo (enrollment,fullname, dob, faculty, gender, nameClass ) values(%s,%s,%s,%s,%s,%s);"
+    val = (id, fullname, dob, faculty,gender, nameClass)
+    c.execute(sql, val)
+    conn.commit()
 #============================Attendance============================
 def create_data_attendance(date):
     sql = "create table if not exists attendance" + str(date) + "(id integer primary key auto_increment,enrollment varchar(25) not null,fullname text not null,date varchar(20) not null, datetime varchar(50) not null);"
